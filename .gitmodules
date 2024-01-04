@@ -1,0 +1,4 @@
+[submodule "SSPanel-Uim"]
+	path = SSPanel-Uim
+	url = git@github.com:Anankke/SSPanel-Uim.git
+	branch = 2023.6

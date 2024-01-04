@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - '127.0.0.1:80:80'
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./etc/nginx.conf:/etc/nginx/conf.d/default.conf
+      - public:/app/public
+      - socket:/run/sspanel
+    restart: always
+    depends_on:
+      - app
+
+  app:
+    image: jat001/sspanel-uim:latest
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - public:/app/public
+      - socket:/run/sspanel
+      - ./config:/app/config
+    restart: always
+    depends_on:
+      - db
+      - cache
+
+  db:
+    image: mariadb:latest
+    ports:
+      - '127.0.0.1:3306:3306'
+    environment:
+      TZ: Asia/Shanghai
+      MARIADB_ROOT_PASSWORD: ChangeMe
+    volumes:
+      - ./etc/mariadb.cnf:/etc/mysql/conf.d/99-default.cnf
+      - mariadb:/var/lib/mysql
+      - socket:/run/sspanel
+    restart: always
+
+  cache:
+    image: redis:alpine
+    ports:
+      - '127.0.0.1:6379:6379'
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./etc/redis.conf:/usr/local/etc/redis/default.conf
+      - redis:/data
+      - socket:/run/sspanel
+    restart: always
+    command: redis-server /usr/local/etc/redis/default.conf
+
+volumes:
+  public:
+  socket:
+  mariadb:
+  redis:

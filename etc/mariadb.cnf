@@ -1,0 +1,3 @@
+[client-server]
+port = 3306
+socket = /run/sspanel/mysqld.sock
