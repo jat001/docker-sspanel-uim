@@ -3,7 +3,7 @@ FROM php:fpm
 
 RUN apt-get update && \
     apt-get dist-upgrade -y && \
-    apt-get install -y cron libyaml-dev libzip-dev && \
+    apt-get install -y libyaml-dev libzip-dev && \
     rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install bcmath mysqli pdo_mysql zip && \
@@ -37,10 +37,6 @@ opcache.validate_permission = 1\n\
 opcache.validate_root = 1' \
 >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
 
-RUN echo '*/5 * * * * /usr/local/bin/php /app/xcat Cron' > /var/spool/cron/crontabs/www-data && \
-    chown www-data:crontab /var/spool/cron/crontabs/www-data && \
-    chmod 0600 /var/spool/cron/crontabs/www-data
-
 ENV APP_VER=2023.6 DB_VER=2023102200
 COPY --chown=www-data ./SSPanel-Uim /app
 WORKDIR /app
@@ -49,4 +45,3 @@ USER www-data
 RUN composer update --no-dev
 
 USER root
-CMD cron && php-fpm
