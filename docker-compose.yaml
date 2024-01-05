@@ -20,9 +20,27 @@ services:
     environment:
       TZ: Asia/Shanghai
     volumes:
-      - public:/app/public
-      - socket:/run/sspanel
       - ./config:/app/config
+      - public:/app/public
+      - storage:/app/storage
+      - socket:/run/sspanel
+    restart: always
+    depends_on:
+      - cron
+
+  cron:
+    image: jat001/sspanel-uim:latest
+    entrypoint: /app/docker-entrypoint.sh
+    environment:
+      TZ: Asia/Shanghai
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      REDIS_DEFAULT_PASSWORD: ${REDIS_DEFAULT_PASSWORD}
+      SSPANEL_ADMIN_EMAIL: ${SSPANEL_ADMIN_EMAIL}
+      SSPANEL_ADMIN_PASSWORD: ${SSPANEL_ADMIN_PASSWORD}
+    volumes:
+      - ./config:/app/config
+      - storage:/app/storage
+      - socket:/run/sspanel
     restart: always
     depends_on:
       - db
@@ -34,10 +52,10 @@ services:
       - '127.0.0.1:3306:3306'
     environment:
       TZ: Asia/Shanghai
-      MARIADB_ROOT_PASSWORD: ChangeMe
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     volumes:
       - ./etc/mariadb.cnf:/etc/mysql/conf.d/99-default.cnf
-      - mariadb:/var/lib/mysql
+      - ./mariadb:/var/lib/mysql
       - socket:/run/sspanel
     restart: always
 
@@ -49,13 +67,14 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - ./etc/redis.conf:/usr/local/etc/redis/default.conf
-      - redis:/data
+      - ./redis:/data
       - socket:/run/sspanel
     restart: always
-    command: redis-server /usr/local/etc/redis/default.conf
+    command: |
+      redis-server /usr/local/etc/redis/default.conf \
+      --user 'default' 'on' '>${REDIS_DEFAULT_PASSWORD}' '~*' '&*' '+@all'
 
 volumes:
   public:
+  storage:
   socket:
-  mariadb:
-  redis:

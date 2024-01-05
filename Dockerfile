@@ -6,7 +6,7 @@ RUN apt-get update && \
     apt-get install -y libyaml-dev libzip-dev && \
     rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install bcmath mysqli pdo_mysql zip && \
+RUN docker-php-ext-install bcmath pdo_mysql zip && \
     yes '' | pecl install redis && \
     yes '' | pecl install yaml && \
     docker-php-ext-enable opcache redis yaml
@@ -43,5 +43,6 @@ WORKDIR /app
 
 USER www-data
 RUN composer update --no-dev
-
 USER root
+
+COPY --chown=www-data ./docker-entrypoint.sh ./docker-tool.php /app/
