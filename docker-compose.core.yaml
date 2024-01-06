@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - '127.0.0.1:80:80'
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./etc/nginx.conf:/etc/nginx/conf.d/default.conf
+      - public:/app/public
+      - socket:/run/sspanel
+    restart: always
+    depends_on:
+      app:
+        condition: service_started
+
+  app:
+    image: jat001/sspanel-uim:latest
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - ./config:/app/config
+      - public:/app/public
+      - storage:/app/storage
+      - socket:/run/sspanel
+    restart: always
+    depends_on:
+      cron:
+        condition: service_started
+
+  cron:
+    image: jat001/sspanel-uim:latest
+    entrypoint: /app/docker-entrypoint.sh
+    environment:
+      TZ: Asia/Shanghai
+    env_file:
+      - ./.env
+    volumes:
+      - ./config:/app/config
+      - storage:/app/storage
+      - socket:/run/sspanel
+    restart: always
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+  init:
+    image: busybox:latest
+    volumes:
+      - socket:/run/sspanel
+    restart: on-failure
+    command: chmod 777 /run/sspanel
+
+volumes:
+  public:
+  storage:
+  socket:

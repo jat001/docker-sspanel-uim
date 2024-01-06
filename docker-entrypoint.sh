@@ -23,11 +23,12 @@ php docker-tool.php tables_exist || create_database
 
 i=0
 while :; do
-    php docker-tool.php user_exists || php docker-tool.php create_user
+    php docker-tool.php user_exists || php docker-tool.php create_acl
 
     [[ $((i % 5)) == 0 ]] && php xcat Cron
 
     [[ $((i % 60)) == 0 ]] && i=0
-    ((i++))
+    # ((i++)) returns 1 when i is 0
+    : $((i++))
     sleep 60
 done

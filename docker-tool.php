@@ -78,11 +78,8 @@ class Tool
         $this->redis_default_username = 'default';
         $this->redis_default_password = getenv('REDIS_DEFAULT_PASSWORD');
 
-        $this->redis_username = $_ENV['redis_username'];
-        if (!is_string($this->redis_username) || $this->redis_username === '') {
-            $this->redis_username = $this->redis_default_username;
-        }
-        $this->redis_password = $_ENV['redis_password'];
+        $this->redis_username = $_ENV['redis_username'] === '' ? $this->redis_default_username : $_ENV['redis_username'];
+        $this->redis_password = $_ENV['redis_password'] === '' ? 'nopass' : '>' . $_ENV['redis_password'];
 
         $this->redis_connect_options = [
             'host' => $this->redis_host,
@@ -158,7 +155,7 @@ class Tool
             $this->redis_username,
             'on',
             $this->redis_username === $this->redis_default_username ? ">$this->redis_default_password" : '',
-            ">$this->redis_password",
+            "$this->redis_password",
             '~*',
             '&*',
             '+@all',

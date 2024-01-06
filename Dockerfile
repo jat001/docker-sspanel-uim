@@ -6,7 +6,7 @@ RUN apt-get update && \
     apt-get install -y libyaml-dev libzip-dev && \
     rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install bcmath pdo_mysql zip && \
+RUN docker-php-ext-install bcmath mysqli pdo_mysql zip && \
     yes '' | pecl install redis && \
     yes '' | pecl install yaml && \
     docker-php-ext-enable opcache redis yaml
@@ -38,11 +38,12 @@ opcache.validate_root = 1' \
 >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
 
 ENV APP_VER=2023.6 DB_VER=2023102200
-COPY --chown=www-data ./SSPanel-Uim /app
+COPY --chown=www-data:www-data ./SSPanel-Uim /app
 WORKDIR /app
+RUN curl -fsSL https://github.com/SSPanel-UIM/SSPanel-UIM-Dev/pull/17.diff | patch -p1
 
-USER www-data
-RUN composer update --no-dev
+USER www-data:www-data
+RUN COMPOSER_CACHE_DIR=/tmp/composer composer update --no-dev && rm -rf /tmp/composer
 USER root
 
-COPY --chown=www-data ./docker-entrypoint.sh ./docker-tool.php /app/
+COPY --chown=www-data:www-data ./docker-entrypoint.sh ./docker-tool.php /app/

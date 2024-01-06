@@ -2,77 +2,39 @@ version: '3'
 
 services:
   web:
-    image: nginx:alpine
-    ports:
-      - '127.0.0.1:80:80'
-    environment:
-      TZ: Asia/Shanghai
-    volumes:
-      - ./etc/nginx.conf:/etc/nginx/conf.d/default.conf
-      - public:/app/public
-      - socket:/run/sspanel
-    restart: always
-    depends_on:
-      - app
+    extends:
+      file: docker-compose.core.yaml
+      service: web
 
   app:
-    image: jat001/sspanel-uim:latest
-    environment:
-      TZ: Asia/Shanghai
-    volumes:
-      - ./config:/app/config
-      - public:/app/public
-      - storage:/app/storage
-      - socket:/run/sspanel
-    restart: always
-    depends_on:
-      - cron
+    extends:
+      file: docker-compose.core.yaml
+      service: app
 
   cron:
-    image: jat001/sspanel-uim:latest
-    entrypoint: /app/docker-entrypoint.sh
-    environment:
-      TZ: Asia/Shanghai
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
-      REDIS_DEFAULT_PASSWORD: ${REDIS_DEFAULT_PASSWORD}
-      SSPANEL_ADMIN_EMAIL: ${SSPANEL_ADMIN_EMAIL}
-      SSPANEL_ADMIN_PASSWORD: ${SSPANEL_ADMIN_PASSWORD}
-    volumes:
-      - ./config:/app/config
-      - storage:/app/storage
-      - socket:/run/sspanel
-    restart: always
+    extends:
+      file: docker-compose.core.yaml
+      service: cron
     depends_on:
-      - db
-      - cache
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
 
   db:
-    image: mariadb:latest
-    ports:
-      - '127.0.0.1:3306:3306'
-    environment:
-      TZ: Asia/Shanghai
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
-    volumes:
-      - ./etc/mariadb.cnf:/etc/mysql/conf.d/99-default.cnf
-      - ./mariadb:/var/lib/mysql
-      - socket:/run/sspanel
-    restart: always
+    extends:
+      file: docker-compose.extra.yaml
+      service: db
 
   cache:
-    image: redis:alpine
-    ports:
-      - '127.0.0.1:6379:6379'
-    environment:
-      TZ: Asia/Shanghai
-    volumes:
-      - ./etc/redis.conf:/usr/local/etc/redis/default.conf
-      - ./redis:/data
-      - socket:/run/sspanel
-    restart: always
-    command: |
-      redis-server /usr/local/etc/redis/default.conf \
-      --user 'default' 'on' '>${REDIS_DEFAULT_PASSWORD}' '~*' '&*' '+@all'
+    extends:
+      file: docker-compose.extra.yaml
+      service: cache
+
+  init:
+    extends:
+      file: docker-compose.core.yaml
+      service: init
 
 volumes:
   public:
