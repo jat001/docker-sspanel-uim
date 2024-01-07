@@ -7,13 +7,13 @@ services:
       - '127.0.0.1:3306:3306'
     environment:
       TZ: Asia/Shanghai
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
     volumes:
       - ./etc/mariadb.cnf:/etc/mysql/conf.d/99-default.cnf
       - mariadb:/var/lib/mysql
       - socket:/run/sspanel
     healthcheck:
-      test: mariadb-admin ping -p'${MARIADB_ROOT_PASSWORD}'
+      test: mariadb-admin ping -p"$$MARIADB_ROOT_PASSWORD"
       interval: 10s
       timeout: 2s
       # start_* not works until docker engine 25.0
@@ -32,12 +32,13 @@ services:
       - '127.0.0.1:6379:6379'
     environment:
       TZ: Asia/Shanghai
+      REDIS_DEFAULT_PASSWORD: $REDIS_DEFAULT_PASSWORD
     volumes:
       - ./etc/redis.conf:/usr/local/etc/redis/default.conf
       - redis:/data
       - socket:/run/sspanel
     healthcheck:
-      test: redis-cli -a '${REDIS_DEFAULT_PASSWORD}' --no-auth-warning ping
+      test: redis-cli -a "$$REDIS_DEFAULT_PASSWORD" --no-auth-warning ping
       interval: 5s
       timeout: 2s
       # start_* not works until docker engine 25.0
@@ -48,7 +49,7 @@ services:
     restart: always
     command: >
       redis-server /usr/local/etc/redis/default.conf
-      --user 'default' 'on' '>${REDIS_DEFAULT_PASSWORD}' '~*' '&*' '+@all'
+      --user 'default' 'on' ">$$REDIS_DEFAULT_PASSWORD" '~*' '&*' '+@all'
     depends_on:
       init:
         condition: service_completed_successfully
