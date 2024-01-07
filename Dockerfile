@@ -62,7 +62,7 @@ WORKDIR /app
 RUN curl -fsSL https://github.com/SSPanel-UIM/SSPanel-UIM-Dev/pull/17.diff | patch -p1
 
 USER www-data:www-data
-RUN COMPOSER_CACHE_DIR=/tmp/composer composer update --no-dev && rm -rf /tmp/composer
+RUN COMPOSER_CACHE_DIR=/tmp/composer composer update --no-dev --no-progress && rm -rf /tmp/composer
 USER root
 
 COPY --chown=www-data:www-data ./docker-entrypoint.sh ./docker-tool.php /app/
