@@ -55,6 +55,8 @@ You can also run mariadb and redis on another host, just change `db_host`, `db_p
 
 `web` (nginx), `app` (sspanel) and `cron` (crontab) must run on the same host, `db` (mariadb) and `cache` (redis) can run on another host.
 
-Take a look at `etc` directory for more customization.
+You can create your own compose file, such as `docker-compose.custom.yaml`, to override the default attributes in `docker-compose.core.yaml` and `docker-compose.extra.yaml`. See [extends](https://docs.docker.com/compose/compose-file/05-services/#extends) for more information.
+
+Take a look at [`etc`](./etc) directory for more customization.
 
 Strongly recommend to use `cloudflared` (Cloudflare Tunnel client) to proxy your web server, rather than exposing it to the public internet.
