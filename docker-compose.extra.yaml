@@ -49,7 +49,7 @@ services:
     restart: always
     command: >
       redis-server /usr/local/etc/redis/default.conf
-      --user 'default' 'on' ">$$REDIS_DEFAULT_PASSWORD" '~*' '&*' '+@all'
+      --user 'default' 'on' '>$REDIS_DEFAULT_PASSWORD' '~*' '&*' '+@all'
     depends_on:
       init:
         condition: service_completed_successfully
