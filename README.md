@@ -4,13 +4,6 @@ SSPanel UIM in Docker container
 
 ## Usage
 
-Copy `config` folder from image to host
-
-```bash
-docker run -it --name=sspanel-tmp --rm --entrypoint=bash jat001/sspanel-uim:latest
-docker cp sspanel-tmp:/app/config ./config
-```
-
 Create `.env` file and edit it
 
 ```text
@@ -27,25 +20,40 @@ cp config/.config.example.php config/.config.php
 cp config/appprofile.example.php config/appprofile.php
 ```
 
-Some example configs of `.config.php`
+Create `.config.php` in `config` directory and edit it
 
 ```php
-$_ENV['db_driver']    = 'mysql';
-$_ENV['db_host']      = '';
-$_ENV['db_socket']    = '/run/sspanel/mysqld.sock';
-$_ENV['db_database']  = 'sspanel';
-$_ENV['db_username']  = 'sspanel';
-$_ENV['db_password']  = 'sspanel';
-$_ENV['db_port']      = '3306';
+<?php
 
-$_ENV['redis_host']            = '/run/sspanel/redis.sock';
-$_ENV['redis_port']            = -1;
-$_ENV['redis_connect_timeout'] = 2.0;
-$_ENV['redis_read_timeout']    = 8.0;
-$_ENV['redis_username']        = 'sspanel';
-$_ENV['redis_password']        = 'sspanel';
-$_ENV['redis_ssl']             = false;
-$_ENV['redis_ssl_context']     = [];
+declare(strict_types=1);
+
+require_once __DIR__ . '/.config.example.php';
+
+$_ENV['db_socket'] = '/run/sspanel/mysqld.sock';
+$_ENV['db_database'] = 'sspanel';
+$_ENV['db_username'] = 'sspanel';
+$_ENV['db_password'] = 'sspanel';
+
+$_ENV['redis_host'] = '/run/sspanel/redis.sock';
+$_ENV['redis_port'] = -1;
+$_ENV['redis_username'] = 'sspanel';
+$_ENV['redis_password'] = 'sspanel';
+
+# Override other default values here
+
+```
+
+Create `appprofile.php` in `config` directory and edit it
+
+```php
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/appprofile.example.php';
+
+# Override the default values here
+
 ```
 
 You don't need to create mariadb database and mariadb/redis user, the entrypoint script will do it for you.

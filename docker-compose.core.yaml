@@ -12,6 +12,15 @@ services:
       - public:/app/public
       - socket:/run/sspanel
     restart: always
+    healthcheck:
+      test: curl -fsS http://localhost:80/ping
+      interval: 10s
+      timeout: 2s
+      # start_* not works until docker engine 25.0
+      # https://github.com/moby/moby/issues/45897
+      start_period: 10s
+      start_interval: 2s
+      retries: 2
     depends_on:
       app:
         condition: service_started
@@ -21,14 +30,15 @@ services:
     environment:
       TZ: Asia/Shanghai
     volumes:
-      - ./config:/app/config
+      - ./config/.config.php:/app/config/.config.php
+      - ./config/appprofile.php:/app/config/appprofile.php
       - public:/app/public
       - storage:/app/storage
       - socket:/run/sspanel
     restart: always
     depends_on:
       cron:
-        condition: service_started
+        condition: service_healthy
 
   cron:
     image: jat001/sspanel-uim:latest
@@ -38,20 +48,27 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./config:/app/config
+      - ./config/.config.php:/app/config/.config.php
+      - ./config/appprofile.php:/app/config/appprofile.php
       - storage:/app/storage
       - socket:/run/sspanel
+    user: www-data:www-data
+    healthcheck:
+      test: test -f /tmp/docker-entrypoint.pid
+      # test: >
+      #   test -f /tmp/docker-entrypoint.pid &&
+      #   pid="$(cat /tmp/docker-entrypoint.pid | xargs)" &&
+      #   test -n "$pid" &&
+      #   test -L "/proc/$pid/exe" &&
+      #   test "$(readlink "/proc/$pid/exe")" = /usr/bin/bash
+      interval: 5s
+      timeout: 2s
+      # start_* not works until docker engine 25.0
+      # https://github.com/moby/moby/issues/45897
+      start_period: 5s
+      start_interval: 2s
+      retries: 2
     restart: always
-    depends_on:
-      init:
-        condition: service_completed_successfully
-
-  init:
-    image: busybox:latest
-    volumes:
-      - socket:/run/sspanel
-    restart: on-failure
-    command: chmod 777 /run/sspanel
 
 volumes:
   public:
