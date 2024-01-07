@@ -136,8 +136,8 @@ class Tool
         ]);
 
         $sql = "CREATE DATABASE IF NOT EXISTS `$this->db_name` CHARACTER SET $this->db_charset COLLATE $this->db_collation;
-                CREATE USER IF NOT EXISTS '$this->db_username'@'localhost' IDENTIFIED BY '$this->db_password';
-                GRANT ALL ON `$this->db_name`.* TO '$this->db_username'@'localhost';
+                CREATE USER IF NOT EXISTS '$this->db_username'@'%' IDENTIFIED BY '$this->db_password';
+                GRANT ALL ON `$this->db_name`.* TO '$this->db_username'@'%';
                 FLUSH PRIVILEGES;";
 
         $result = $pdo->exec($sql);
