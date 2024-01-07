@@ -14,16 +14,16 @@ services:
     restart: always
     healthcheck:
       test: curl -fsS http://localhost:80/ping
-      interval: 10s
+      interval: 5s
       timeout: 2s
       # start_* not works until docker engine 25.0
       # https://github.com/moby/moby/issues/45897
-      start_period: 10s
+      start_period: 5s
       start_interval: 2s
-      retries: 2
+      retries: 4
     depends_on:
       app:
-        condition: service_started
+        condition: service_healthy
 
   app:
     image: jat001/sspanel-uim:latest
@@ -36,6 +36,15 @@ services:
       - storage:/app/storage
       - socket:/run/sspanel
     restart: always
+    healthcheck:
+      test: test -S /run/sspanel/php-fpm.sock && echo 'ok'
+      interval: 5s
+      timeout: 2s
+      # start_* not works until docker engine 25.0
+      # https://github.com/moby/moby/issues/45897
+      start_period: 5s
+      start_interval: 2s
+      retries: 4
     depends_on:
       cron:
         condition: service_healthy
@@ -50,24 +59,25 @@ services:
     volumes:
       - ./config/.config.php:/app/config/.config.php
       - ./config/appprofile.php:/app/config/appprofile.php
+      - public:/app/public
       - storage:/app/storage
       - socket:/run/sspanel
     user: www-data:www-data
     healthcheck:
-      test: test -f /tmp/docker-entrypoint.pid
-      # test: >
-      #   test -f /tmp/docker-entrypoint.pid &&
-      #   pid="$(cat /tmp/docker-entrypoint.pid | xargs)" &&
-      #   test -n "$pid" &&
-      #   test -L "/proc/$pid/exe" &&
-      #   test "$(readlink "/proc/$pid/exe")" = /usr/bin/bash
-      interval: 5s
+      test: >
+        test -f /tmp/docker-entrypoint.pid &&
+        pid="$$(cat /tmp/docker-entrypoint.pid | xargs)" &&
+        test -n "$$pid" &&
+        test -L "/proc/$$pid/exe" &&
+        test "$$(readlink "/proc/$$pid/exe")" = /usr/bin/bash &&
+        echo 'ok'
+      interval: 10s
       timeout: 2s
       # start_* not works until docker engine 25.0
       # https://github.com/moby/moby/issues/45897
-      start_period: 5s
+      start_period: 10s
       start_interval: 2s
-      retries: 2
+      retries: 4
     restart: always
 
 volumes:

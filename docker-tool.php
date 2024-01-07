@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/.config.php';
 
 function fail(string $message): void
@@ -45,6 +46,8 @@ class Tool
 
     private array $redis_connect_options;
     private Redis $redis;
+
+    private string $maxmind_license_key;
 
     public function __construct()
     {
@@ -95,6 +98,8 @@ class Tool
             $this->redis_connect_options['ssl'] = $this->redis_ssl_context;
         }
         $this->redis = new Redis($this->redis_connect_options);
+
+        $this->maxmind_license_key = $_ENV['maxmind_license_key'];
     }
 
     public function __call(string $name, array $arguments)
@@ -126,19 +131,26 @@ class Tool
 
     public function create_database(): void
     {
-        $pdo = new PDO($this->db_dsn, $this->db_root_username, $this->db_root_password);
+        $pdo = new PDO($this->db_dsn, $this->db_root_username, $this->db_root_password, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
+        ]);
 
         $sql = "CREATE DATABASE IF NOT EXISTS `$this->db_name` CHARACTER SET $this->db_charset COLLATE $this->db_collation;
                 CREATE USER IF NOT EXISTS '$this->db_username'@'localhost' IDENTIFIED BY '$this->db_password';
                 GRANT ALL ON `$this->db_name`.* TO '$this->db_username'@'localhost';
                 FLUSH PRIVILEGES;";
 
-        $pdo->exec($sql);
+        $result = $pdo->exec($sql);
+
+        if ($result === false) {
+            fail($pdo->errorInfo()[2]);
+        }
     }
 
     public function user_exists(): void
     {
         $result = $this->redis->acl('GETUSER', $this->redis_username);
+
         if ($result === false) {
             echo 'User not exists' . PHP_EOL;
             exit(1);
@@ -161,8 +173,28 @@ class Tool
             '+@all',
             $this->redis_username === $this->redis_default_username ? '' : '-@dangerous',
         );
+
         if ($result !== true) {
             fail($this->redis->getLastError());
+        }
+    }
+
+    public function download_mmdb(): void
+    {
+        if ($this->maxmind_license_key === '') {
+            fail('Please set maxmind license key in .config.php');
+        }
+
+        $client = new tronovav\GeoIP2Update\Client([
+            'license_key' => $this->maxmind_license_key,
+            'dir' => __DIR__ . '/storage/',
+            'editions' => ['GeoLite2-City', 'GeoLite2-Country'],
+        ]);
+
+        try {
+            $client->run();
+        } catch (Exception $e) {
+            fail($e->getMessage());
         }
     }
 }

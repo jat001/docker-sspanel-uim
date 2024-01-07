@@ -11,7 +11,8 @@ RUN apt-get update && \
 RUN docker-php-ext-install bcmath mysqli pdo_mysql zip && \
     yes '' | pecl install redis && \
     yes '' | pecl install yaml && \
-    docker-php-ext-enable opcache redis yaml
+    docker-php-ext-enable opcache redis yaml && \
+    rm -rf /tmp/pear
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 

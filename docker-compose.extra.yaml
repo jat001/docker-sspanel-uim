@@ -20,7 +20,7 @@ services:
       # https://github.com/moby/moby/issues/45897
       start_period: 10s
       start_interval: 2s
-      retries: 2
+      retries: 4
     restart: always
     depends_on:
       init:
@@ -44,7 +44,7 @@ services:
       # https://github.com/moby/moby/issues/45897
       start_period: 5s
       start_interval: 2s
-      retries: 2
+      retries: 4
     restart: always
     command: >
       redis-server /usr/local/etc/redis/default.conf
