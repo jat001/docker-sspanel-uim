@@ -1,10 +1,10 @@
 # docker-sspanel-uim [![wakatime](https://wakatime.com/badge/github/jat001/docker-sspanel-uim.svg)](https://wakatime.com/@Jat/projects/yieaswmqse)
 
-SSPanel UIM in Docker container
+SSPanel UIM in Docker container.
 
 ## Usage
 
-Create `.env` file and edit it
+Create `.env` file and edit it:
 
 ```text
 MARIADB_ROOT_PASSWORD=MyRootPassword
@@ -13,14 +13,7 @@ SSPANEL_ADMIN_EMAIL=sspanel@example.com
 SSPANEL_ADMIN_PASSWORD=MySSPanelPassword
 ```
 
-Copy `.config.example.php` to `.config.php`, `appprofile.example.php` to `appprofile.php` and edit them
-
-```bash
-cp config/.config.example.php config/.config.php
-cp config/appprofile.example.php config/appprofile.php
-```
-
-Create `.config.php` in `config` directory and edit it
+Create `.config.php` in `config` directory and edit it:
 
 ```php
 <?php
@@ -43,7 +36,7 @@ $_ENV['redis_password'] = 'sspanel';
 
 ```
 
-Create `appprofile.php` in `config` directory and edit it
+Create `appprofile.php` in `config` directory and edit it.
 
 ```php
 <?php
@@ -61,3 +54,7 @@ You don't need to create mariadb database and mariadb/redis user, the entrypoint
 You can also run mariadb and redis on another host, just change `db_host`, `db_port`, `redis_host`, `redis_port` to the correct value.
 
 `web` (nginx), `app` (sspanel) and `cron` (crontab) must run on the same host, `db` (mariadb) and `cache` (redis) can run on another host.
+
+Take a look at `etc` directory for more customization.
+
+Strongly recommend to use `cloudflared` (Cloudflare Tunnel client) to proxy your web server, rather than exposing it to the public internet.
