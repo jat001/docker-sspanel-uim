@@ -36,42 +36,64 @@ php docker-tool.php tables_exist || create_database
 # for healthcheck, let docker know the database has been created
 echo -n $$ >/tmp/docker-entrypoint.pid
 
-i=0
-while :; do
-    # every 1 minute
+shutdown() {
+    print 'Shutting down...'
+    kill $(jobs -p)
+    print 'Goodbye'
+}
+
+trap shutdown EXIT
+
+cron_1m() {
     php docker-tool.php user_exists >/dev/null || {
         print 'Creating redis user...'
         php docker-tool.php create_acl || :
-
-        print 'Done'
+        print 'Created redis user'
     }
+}
 
-    # every 5 minutes
+cron_5m() {
+    php xcat Cron || :
+}
+
+cron_24h() {
+    print 'Downloading maxmind database...'
+    php docker-tool.php download_mmdb || :
+    print 'Downloaded maxmind database'
+}
+
+cron_7d() {
+    print 'Resetting counter...'
+    i=0
+}
+
+i=0
+while :; do
+    print 'Running every 1 minute cron jobs...'
+    cron_1m
+    print 'Every 1 minute cron jobs done'
+
     [[ $((i % 5)) -eq 0 ]] && {
-        print 'Running cron jobs...'
-        php xcat Cron || :
-
-        print 'Done'
+        print 'Running every 5 minutes cron jobs...'
+        cron_5m
+        print 'Every 5 minutes cron jobs done'
     }
 
-    # every 24 hours
     [[ $i -eq 0 || $((i % 1440)) -eq 0 ]] && {
-        print 'Downloading maxmind database...'
-        php docker-tool.php download_mmdb || :
-
-        print 'Done'
+        print 'Running every 24 hours cron jobs...'
+        cron_24h
+        print 'Every 24 hours cron jobs done'
     }
 
-    # reset every 7 days
     [[ $i -ge 10080 ]] && {
-        print 'Resetting counter...'
-        i=0
-
-        print 'Done'
+        print 'Running every 7 days cron jobs...'
+        cron_7d
+        print 'Every 7 days cron jobs done'
     }
 
     # ((i++)) returns 1 when i is 0
     : $((i++))
 
-    sleep 60
+    sleep 60 &
+    wait
 done
