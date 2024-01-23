@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+
+FROM alpine:3.18
+
+RUN apk add --no-cache bash curl yaml-cpp pcre2 && rm -rf /var/cache/apk/*
+
+RUN adduser -h / -g '' -s /sbin/nologin -D -H subconverter
+
+COPY --from=tindy2013/subconverter:latest /usr/bin/subconverter /usr/bin/subconverter
+COPY --from=tindy2013/subconverter:latest --chown=subconverter:subconverter /base /etc/subconverter
+
+VOLUME ["/etc/subconverter"]
+WORKDIR /etc/subconverter
+EXPOSE 25500/tcp
+
+USER subconverter:subconverter
+ENTRYPOINT ["subconverter"]

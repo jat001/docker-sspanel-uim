@@ -4,7 +4,11 @@ services:
   web:
     image: nginx:alpine
     ports:
-      - '127.0.0.1:80:80'
+      - target: 80
+        host_ip: 127.0.0.1
+        published: 80
+        protocol: tcp
+        mode: host
     environment:
       TZ: Asia/Shanghai
     volumes:
@@ -19,7 +23,7 @@ services:
       # start_* not works until docker engine 25.0
       # https://github.com/moby/moby/issues/45897
       start_period: 5s
-      start_interval: 2s
+      # start_interval: 2s
       retries: 4
     depends_on:
       app:
@@ -43,28 +47,11 @@ services:
       # start_* not works until docker engine 25.0
       # https://github.com/moby/moby/issues/45897
       start_period: 5s
-      start_interval: 2s
+      # start_interval: 2s
       retries: 4
     depends_on:
       cron:
         condition: service_healthy
-
-  subconverter:
-    image: tindy2013/subconverter:latest
-    environment:
-      TZ: Asia/Shanghai
-    ports:
-      - '127.0.0.1:25500:25500'
-    restart: always
-    healthcheck:
-      test: curl -fsS http://127.0.0.1:25500
-      interval: 5s
-      timeout: 2s
-      # start_* not works until docker engine 25.0
-      # https://github.com/moby/moby/issues/45897
-      start_period: 5s
-      start_interval: 2s
-      retries: 4
 
   cron:
     image: jat001/sspanel-uim:latest
@@ -93,9 +80,32 @@ services:
       # start_* not works until docker engine 25.0
       # https://github.com/moby/moby/issues/45897
       start_period: 10s
-      start_interval: 2s
+      # start_interval: 2s
       retries: 4
     restart: always
+
+  sub:
+    image: jat001/subconverter:latest
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - target: 25500
+        host_ip: 127.0.0.1
+        published: 25500
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./etc/subconverter.toml:/etc/subconverter/pref.toml
+    restart: always
+    healthcheck:
+      test: curl -fsS http://localhost:25500/version
+      interval: 5s
+      timeout: 2s
+      # start_* not works until docker engine 25.0
+      # https://github.com/moby/moby/issues/45897
+      start_period: 5s
+      # start_interval: 2s
+      retries: 4
 
 volumes:
   public:

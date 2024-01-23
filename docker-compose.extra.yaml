@@ -4,7 +4,11 @@ services:
   db:
     image: mariadb:latest
     ports:
-      - '127.0.0.1:3306:3306'
+      - target: 3306
+        host_ip: 127.0.0.1
+        published: 3306
+        protocol: tcp
+        mode: host
     environment:
       TZ: Asia/Shanghai
       MARIADB_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
@@ -19,7 +23,7 @@ services:
       # start_* not works until docker engine 25.0
       # https://github.com/moby/moby/issues/45897
       start_period: 10s
-      start_interval: 2s
+      # start_interval: 2s
       retries: 4
     restart: always
     depends_on:
@@ -29,7 +33,11 @@ services:
   cache:
     image: redis:alpine
     ports:
-      - '127.0.0.1:6379:6379'
+      - target: 6379
+        host_ip: 127.0.0.1
+        published: 6379
+        protocol: tcp
+        mode: host
     environment:
       TZ: Asia/Shanghai
       REDIS_DEFAULT_PASSWORD: $REDIS_DEFAULT_PASSWORD
@@ -44,7 +52,7 @@ services:
       # start_* not works until docker engine 25.0
       # https://github.com/moby/moby/issues/45897
       start_period: 5s
-      start_interval: 2s
+      # start_interval: 2s
       retries: 4
     restart: always
     command: >

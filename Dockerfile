@@ -14,7 +14,7 @@ RUN docker-php-ext-install bcmath mysqli pdo_mysql zip && \
     docker-php-ext-enable opcache redis yaml && \
     rm -rf /tmp/pear
 
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN <<EOT
 #!/usr/bin/env bash
