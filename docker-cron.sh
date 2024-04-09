@@ -29,12 +29,12 @@ create_database() {
     # php xcat Update
 }
 
-rm -f /tmp/docker-entrypoint.pid
+rm -f /tmp/docker-cron.pid
 
 php docker-tool.php tables_exist || create_database
 
 # for healthcheck, let docker know the database has been created
-echo -n $$ >/tmp/docker-entrypoint.pid
+echo -n $$ >/tmp/docker-cron.pid
 
 shutdown() {
     print 'Shutting down...'

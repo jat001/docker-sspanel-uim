@@ -55,7 +55,7 @@ services:
 
   cron:
     image: jat001/sspanel-uim:latest
-    entrypoint: /app/docker-entrypoint.sh
+    entrypoint: /app/docker-cron.sh
     environment:
       TZ: Asia/Shanghai
     env_file:
@@ -69,8 +69,8 @@ services:
     user: www-data:www-data
     healthcheck:
       test: >
-        test -f /tmp/docker-entrypoint.pid &&
-        pid="$$(cat /tmp/docker-entrypoint.pid | xargs)" &&
+        test -f /tmp/docker-cron.pid &&
+        pid="$$(cat /tmp/docker-cron.pid | xargs)" &&
         test -n "$$pid" &&
         test -L "/proc/$$pid/exe" &&
         test "$$(readlink "/proc/$$pid/exe")" = /usr/bin/bash &&
