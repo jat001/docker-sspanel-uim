@@ -20,10 +20,8 @@ services:
       test: mariadb-admin ping -p"$$MARIADB_ROOT_PASSWORD"
       interval: 10s
       timeout: 2s
-      # start_* not works until docker engine 25.0
-      # https://github.com/moby/moby/issues/45897
       start_period: 10s
-      # start_interval: 2s
+      start_interval: 2s
       retries: 4
     restart: always
     depends_on:
@@ -49,10 +47,8 @@ services:
       test: redis-cli -a "$$REDIS_DEFAULT_PASSWORD" --no-auth-warning ping
       interval: 5s
       timeout: 2s
-      # start_* not works until docker engine 25.0
-      # https://github.com/moby/moby/issues/45897
       start_period: 5s
-      # start_interval: 2s
+      start_interval: 2s
       retries: 4
     restart: always
     command: >
